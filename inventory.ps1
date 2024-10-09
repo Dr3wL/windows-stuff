@@ -19,8 +19,8 @@ foreach ($computer in $computers) {
         # Get operating system details
         $operatingSystem = $computer.OperatingSystem
 
-        # Get services and versions (using Get-WmiObject)
-        $services = Get-WmiObject -Class Win32_Service -ComputerName $hostName -ErrorAction SilentlyContinue -Credential $credentials | 
+        # Get services and versions (using Get-CimInstance)
+        $services = Get-CimInstance -ClassName Win32_Service -ComputerName $hostName -ErrorAction SilentlyContinue -Credential $credentials | 
             Select-Object Name, DisplayName, StartMode, State, PathName
 
         # Create a custom object to store computer information
@@ -40,4 +40,4 @@ foreach ($computer in $computers) {
 
 # Export computer information to CSV file on desktop
 $desktopPath = [Environment]::GetFolderPath("Desktop")
-$computerInfo | Export-Csv -Path "$desktopPath\ComputerInfo.csv" -NoTypeInformation
+$computerInfo | Export-Csv -Path "$desktopPath\Inventory.csv" -NoTypeInformation
