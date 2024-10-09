@@ -24,9 +24,10 @@ foreach ($computer in $computers) {
         # Get operating system details
         $operatingSystem = $computer.OperatingSystem
 
-        # Get services and versions (using Get-WmiObject)
-        $services = Get-WmiObject -Class Win32_Service -ComputerName $computer.Name -ErrorAction SilentlyContinue -Credential $credentials | 
-            Select-Object Name, DisplayName, StartMode, State, PathName
+        # Get services information using Invoke-Command
+        $servicesInfo = Invoke-Command -ComputerName $computer.Name -Credential $credentials -ScriptBlock {
+            Get-Service | Select-Object Name, DisplayName, StartType, Status
+        }
 
         # Create a custom object to store computer information
         $info = [PSCustomObject]@{
@@ -35,7 +36,7 @@ foreach ($computer in $computers) {
             "IPv6 Network Address" = $ipInfo."IPv6 Address"
             "Mac"                  = $ipInfo."MAC Address"
             "Operating System"     = $operatingSystem
-            "Services and Versions" = ($services | Out-String).Trim()
+            "Services"             = ($servicesInfo | Format-Table -AutoSize | Out-String).Trim()
         }
 
         # Add computer information to the array
