@@ -19,9 +19,15 @@ foreach ($computer in $computers) {
         # Get operating system details
         $operatingSystem = $computer.OperatingSystem
 
-        # Get services and versions (using Get-CimInstance)
-        $services = Get-CimInstance -ClassName Win32_Service -ComputerName $hostName -ErrorAction SilentlyContinue -Credential $credentials | 
+        # Create a CIM session using the provided credentials
+        $session = New-CimSession -ComputerName $hostName -Credential $credentials -ErrorAction SilentlyContinue
+
+        # Get services and versions (using Get-CimInstance with the session)
+        $services = Get-CimInstance -ClassName Win32_Service -CimSession $session -ErrorAction SilentlyContinue | 
             Select-Object Name, DisplayName, StartMode, State, PathName
+
+        # Remove the session
+        Remove-CimSession -CimSession $session
 
         # Create a custom object to store computer information
         $info = [PSCustomObject]@{
@@ -40,4 +46,4 @@ foreach ($computer in $computers) {
 
 # Export computer information to CSV file on desktop
 $desktopPath = [Environment]::GetFolderPath("Desktop")
-$computerInfo | Export-Csv -Path "$desktopPath\Inventory.csv" -NoTypeInformation
+$computerInfo | Export-Csv -Path "$desktopPath\ComputerInfo.csv" -NoTypeInformation
