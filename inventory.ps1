@@ -1,8 +1,11 @@
 # Import Active Directory module
 Import-Module ActiveDirectory
 
-# Get all Windows computers in the domain
-$computers = Get-ADComputer -Filter * -Properties *
+# Prompt for credentials
+$credentials = Get-Credential -Message "Enter credentials for Active Directory access" -UserName (whoami)
+
+# Get all Windows computers in the domain using provided credentials
+$computers = Get-ADComputer -Filter * -Properties * -Credential $credentials
 
 # Create an array to store computer information
 $computerInfo = @()
@@ -20,7 +23,7 @@ foreach ($computer in $computers) {
         $operatingSystem = $computer.OperatingSystem
 
         # Get services and versions (using Get-WmiObject)
-        $services = Get-WmiObject -Class Win32_Service -ComputerName $hostName -ErrorAction SilentlyContinue | 
+        $services = Get-WmiObject -Class Win32_Service -ComputerName $hostName -ErrorAction SilentlyContinue -Credential $credentials | 
             Select-Object Name, DisplayName, StartMode, State, PathName
 
         # Create a custom object to store computer information
