@@ -1,5 +1,5 @@
-# Prompt for credentials
-$credentials = Get-Credential -Message "Enter credentials for Active Directory access" -UserName (whoami)
+$creds = Get-Credential -Message "Enter a set of domain administrator credentials"
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 
 # Get all Windows computers in the domain using provided credentials
 $computers = Get-ADComputer -Filter * -Properties * -Credential $credentials
