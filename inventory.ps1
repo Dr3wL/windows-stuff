@@ -1,4 +1,4 @@
-$creds = Get-Credential -Message "Enter a set of domain administrator credentials"
+$credentials = Get-Credential -Message "Enter a set of domain administrator credentials"
 Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 
 # Get all Windows computers in the domain using provided credentials
