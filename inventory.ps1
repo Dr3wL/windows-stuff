@@ -1,6 +1,3 @@
-# Import Active Directory module
-Import-Module ActiveDirectory
-
 # Prompt for credentials
 $credentials = Get-Credential -Message "Enter credentials for Active Directory access" -UserName (whoami)
 
