@@ -1,16 +1,28 @@
+# Get credentials
 $credentials = Get-Credential -Message "Enter a set of domain administrator credentials"
+
+# Set execution policy
 Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 
-# Get all Windows computers in the domain using provided credentials
+# Get all Windows computers in the domain
 $computers = Get-ADComputer -Filter * -Properties * -Credential $credentials
 
-# Create an array to store computer information
-$computerInfo = @()
+# Create output folder
+$outputFolder = "C:\DomainEnumeration"
+if (!(Test-Path $outputFolder)) {
+    New-Item -ItemType Directory -Path $outputFolder
+}
 
 # Loop through each computer
 foreach ($computer in $computers) {
     if ($computer.OperatingSystem -like "*Windows*") {
-        # Get IP address info using Invoke-Command
+        # Create computer-specific folder
+        $computerFolder = Join-Path $outputFolder $computer.Name
+        if (!(Test-Path $computerFolder)) {
+            New-Item -ItemType Directory -Path $computerFolder
+        }
+
+        # Get IP address info
         $ipInfo = Invoke-Command -ComputerName $computer.Name -Credential $credentials -ScriptBlock {
             $activeNic = Get-NetAdapter | Select-Object -ExpandProperty IfIndex
             [ordered]@{
@@ -24,30 +36,29 @@ foreach ($computer in $computers) {
         # Get operating system details
         $operatingSystem = $computer.OperatingSystem
 
-        # Get services information using Invoke-Command
+        # Get services information
         $servicesInfo = Invoke-Command -ComputerName $computer.Name -Credential $credentials -ScriptBlock {
             Get-Service | Select-Object Name, DisplayName, StartType, Status
         }
 
         # Get Installed Programs
-        $InstalledPrograms = Get-Package | Select-Object Name, Version, ProviderName
-
-        # Create a custom object to store computer information
-        $info = [PSCustomObject]@{
-            "Host Name"            = $ipInfo.Hostname
-            "IPv4 Network Address" = $ipInfo."IPv4 Address"
-            "IPv6 Network Address" = $ipInfo."IPv6 Address"
-            "Mac"                  = $ipInfo."MAC Address"
-            "Operating System"     = $operatingSystem
-            "Services"             = ($servicesInfo | Format-Table -AutoSize | Out-String).Trim()
-            "Installed Programs"   = $InstalledPrograms
+        $InstalledPrograms = Invoke-Command -ComputerName $computer.Name -Credential $credentials -ScriptBlock {
+            Get-Package | Select-Object Name, Version, ProviderName
         }
 
-        # Add computer information to the array
-        $computerInfo += $info
+        # Save network and system info to file
+        [PSCustomObject]@{
+            "Host Name"            = $ipInfo.Hostname
+            "Operating System"     = $operatingSystem
+            "IPv4 Address"         = $ipInfo."IPv4 Address"
+            "IPv6 Address"         = $ipInfo."IPv6 Address"
+            "MAC Address"          = $ipInfo."MAC Address"
+        } | Export-Csv -Path (Join-Path $computerFolder "NetworkAndSystemInfo.csv") -NoTypeInformation
+
+        # Save services info to file
+        $servicesInfo | Export-Csv -Path (Join-Path $computerFolder "Services.csv") -NoTypeInformation
+
+        # Save installed programs to file
+        $InstalledPrograms | Export-Csv -Path (Join-Path $computerFolder "InstalledPrograms.csv") -NoTypeInformation
     }
 }
-
-# Export computer information to CSV file on desktop
-$desktopPath = [Environment]::GetFolderPath("Desktop")
-$computerInfo | Export-Csv -Path "$desktopPath\ComputerInfo.csv" -NoTypeInformation
