@@ -29,6 +29,9 @@ foreach ($computer in $computers) {
             Get-Service | Select-Object Name, DisplayName, StartType, Status
         }
 
+        # Get Installed Programs
+        $InstalledPrograms = Get-Package | Select-Object Name, Version, ProviderName
+
         # Create a custom object to store computer information
         $info = [PSCustomObject]@{
             "Host Name"            = $ipInfo.Hostname
@@ -37,6 +40,7 @@ foreach ($computer in $computers) {
             "Mac"                  = $ipInfo."MAC Address"
             "Operating System"     = $operatingSystem
             "Services"             = ($servicesInfo | Format-Table -AutoSize | Out-String).Trim()
+            "Installed Programs"   = $InstalledPrograms
         }
 
         # Add computer information to the array
