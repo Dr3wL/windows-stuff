@@ -46,7 +46,7 @@ foreach ($computer in $computers) {
             Get-Package | Select-Object Name, Version, ProviderName
         }
 
-        $TimeInfo = Invoke-Command -ComputerName $Computer.Name -Credential $credentials -ScriptBlock {
+        $TimeInfo = Invoke-Command -ComputerName $computer.Name -Credential $credentials -ScriptBlock {
             net time /query
         }
 
