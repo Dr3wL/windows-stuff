@@ -9,7 +9,7 @@ $computers = Get-ADComputer -Filter * -Properties * -Credential $credentials
 
 # Get desktop path
 $desktopPath = [Environment]::GetFolderPath("Desktop")
-$outputFolder = Join-Path $desktopPath "DomainEnumeration"
+$outputFolder = Join-Path $desktopPath "WindowsInventory"
 
 # Create output folder
 if (!(Test-Path $outputFolder)) {
