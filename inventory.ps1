@@ -46,6 +46,10 @@ foreach ($computer in $computers) {
             Get-Package | Select-Object Name, Version, ProviderName
         }
 
+        $TimeInfo = Invoke-Command -ComputerName $Computer.Name -Credential $credentials -ScriptBlock {
+            Get-Date; Get-TimeZone
+        }
+
         # Save network and system info to file
         [PSCustomObject]@{
             "Host Name"            = $ipInfo.Hostname
@@ -60,5 +64,8 @@ foreach ($computer in $computers) {
 
         # Save installed programs to file
         $InstalledPrograms | Export-Csv -Path (Join-Path $computerFolder "InstalledPrograms.csv") -NoTypeInformation
+
+        # Save Time info into file
+        $TimeInfo | Out-File -Path (Join-Path $computerFolder "TimeZoneInfo.txt")
     }
 }
