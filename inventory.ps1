@@ -47,7 +47,7 @@ foreach ($computer in $computers) {
         }
 
         $TimeInfo = Invoke-Command -ComputerName $Computer.Name -Credential $credentials -ScriptBlock {
-            Get-Date; Get-TimeZone
+            net time /query
         }
 
         # Save network and system info to file
