@@ -9,12 +9,18 @@ $computers = Get-ADComputer -Filter * -Properties * -Credential $credentials
 
 # Get desktop path
 $desktopPath = [Environment]::GetFolderPath("Desktop")
+$outputFolder = Join-Path $desktopPath "DomainEnumeration"
+
+# Create output folder
+if (!(Test-Path $outputFolder)) {
+    New-Item -ItemType Directory -Path $outputFolder
+}
 
 # Loop through each computer
 foreach ($computer in $computers) {
     if ($computer.OperatingSystem -like "*Windows*") {
         # Create computer-specific folder
-        $computerFolder = Join-Path $desktopPath $computer.Name
+        $computerFolder = Join-Path $outputFolder $computer.Name
         if (!(Test-Path $computerFolder)) {
             New-Item -ItemType Directory -Path $computerFolder
         }
