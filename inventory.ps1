@@ -66,6 +66,6 @@ foreach ($computer in $computers) {
         $InstalledPrograms | Export-Csv -Path (Join-Path $computerFolder "InstalledPrograms.csv") -NoTypeInformation
 
         # Save Time info into file
-        $TimeInfo | Out-File -Path (Join-Path $computerFolder "TimeZoneInfo.txt")
+        Out-File -InputObject $TimeInfo -FilePath (Join-Path $computerFolder "TimeZoneInfo.txt")
     }
 }
