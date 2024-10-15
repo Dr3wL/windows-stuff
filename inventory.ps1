@@ -7,17 +7,14 @@ Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 # Get all Windows computers in the domain
 $computers = Get-ADComputer -Filter * -Properties * -Credential $credentials
 
-# Create output folder
-$outputFolder = "C:\DomainEnumeration"
-if (!(Test-Path $outputFolder)) {
-    New-Item -ItemType Directory -Path $outputFolder
-}
+# Get desktop path
+$desktopPath = [Environment]::GetFolderPath("Desktop")
 
 # Loop through each computer
 foreach ($computer in $computers) {
     if ($computer.OperatingSystem -like "*Windows*") {
         # Create computer-specific folder
-        $computerFolder = Join-Path $outputFolder $computer.Name
+        $computerFolder = Join-Path $desktopPath $computer.Name
         if (!(Test-Path $computerFolder)) {
             New-Item -ItemType Directory -Path $computerFolder
         }
@@ -46,8 +43,8 @@ foreach ($computer in $computers) {
             Get-Package | Select-Object Name, Version, ProviderName
         }
 
-        $TimeInfo = Invoke-Command -ComputerName $Computer.Name -Credential $credentials -ScriptBlock {
-            net time /query
+        $TimeInfo = Invoke-Command -ComputerName $computer.Name -Credential $credentials -ScriptBlock {
+            net time
         }
 
         # Save network and system info to file
